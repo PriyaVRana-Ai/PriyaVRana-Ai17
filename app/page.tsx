@@ -1,8 +1,8 @@
 "use client"
 import { useState } from "react"
-import Sidebar from "@/components/Sidebar"
-import Chat from "@/components/Chat"
-import ImageAI from "@/components/ImageAI"
+import Sidebar from '@/components/sidebar'
+import Chat from '@/components/chat'  
+import ImageAI from '@/components/imageAi'
 
 export default function Home() {
   const [active, setActive] = useState("Home")
