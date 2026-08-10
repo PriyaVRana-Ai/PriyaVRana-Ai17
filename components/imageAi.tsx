@@ -1,78 +1,173 @@
-"use client"
-import { useState } from "react"
-import { Upload, Wand2, Download } from "lucide-react"
+if (!file) return;
 
-export default function ImageAI() {
-  const [prompt, setPrompt] = useState("")
-  const [image, setImage] = useState<string | null>(null)
-  const [loading, setLoading] = useState(false)
-  const [fileName, setFileName] = useState("No file chosen")
+if (!file.type.startsWith("image/")) {
+  setError("Sirf image file select karo.");
+  return;
+}
 
-  const handleGenerate = async () => {
-    if (!prompt.trim()) return
-    setLoading(true)
-    // Yaha /api/generate-image ka call lagega
-    setTimeout(() => {
-      setImage("https://picsum.photos/600/800") // demo ke liye
-      setLoading(false)
-    }, 1500)
+setFileName(file.name);
+setError("");setLoading(true);
+setError("");
+setImage(null);
+
+try {
+  const response = await fetch("/api/generate-image", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      prompt: prompt.trim(),
+    }),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      data?.error || "Image generate nahi ho paayi."
+    );
   }
 
-  return (
-    <div className="mx-auto max-w-3xl">
-      {/* Header */}
-      <h1 className="text-3xl font-bold text-yellow-400 mb-6">🎨 Image AI</h1>
+  if (!data?.image) {
+    throw new Error("Image response mein nahi mili.");
+  }
 
-      {/* Upload + Prompt Box */}
-      <div
-        className="rounded-2xl p-5 mb-6"
-        style={{ background: "rgba(15,15,22,0.88)", border: "1px solid rgba(255,215,0,0.25)" }}
-      >
-        {/* File Upload */}
-        <div className="flex items-center gap-3 mb-4">
-          <label className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-sm cursor-pointer">
-            <Upload size={16} /> Choose File
-            <input type="file" className="hidden" onChange={(e) => setFileName(e.target.files?.[0]?.name || "No file")} />
-          </label>
-          <span className="text-sm text-gray-400">{fileName}</span>
-        </div>
+  setImage(data.image);
+} catch (error) {
+  console.error(error);
 
-        {/* Prompt Input */}
+  setError(
+    error instanceof Error
+      ? error.message
+      : "Image generate karte waqt error aa gaya."
+  );
+} finally {
+  setLoading(false);
+}const link = document.createElement("a");
+link.href = image;
+link.download = "priyavrana-ai-image.png";
+document.body.appendChild(link);
+link.click();
+document.body.removeChild(link);  <div className="mb-6">
+    <h1 className="text-3xl font-bold text-yellow-400">
+      🎨 Image AI
+    </h1>
+
+    <p className="mt-2 text-sm text-gray-400">
+      PriyaVRana-AI se apni image create karo.
+    </p>
+  </div>
+
+  <div className="rounded-3xl border border-yellow-400/20 bg-[#0F0F16]/90 p-5 shadow-2xl">
+
+    <div className="mb-5">
+      <p className="mb-2 text-sm font-medium text-gray-300">
+        Reference Image
+      </p>
+
+      <div className="flex flex-wrap items-center gap-3">
+
+        <button
+          type="button"
+          onClick={() => fileRef.current?.click()}
+          className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/10 px-4 py-3 text-sm transition hover:bg-white/20"
+        >
+          <Upload size={18} />
+          Choose Image
+        </button>
+
         <input
-          value={prompt}
-          onChange={(e) => setPrompt(e.target.value)}
-          placeholder="Image ko describe karo... jaise: 'make this statue golden'"
-          className="w-full bg-[#1a1a24] rounded-xl px-4 py-3 text-white outline-none border-white/10"
+          ref={fileRef}
+          type="file"
+          accept="image/*"
+          onChange={handleFile}
+          className="hidden"
         />
 
-        {/* Generate Button */}
+        <span className="max-w-[220px] truncate text-sm text-gray-400">
+          {fileName}
+        </span>
+
+      </div>
+    </div>
+
+    <div>
+      <label className="mb-2 block text-sm font-medium text-gray-300">
+        Image Prompt
+      </label>
+
+      <textarea
+        value={prompt}
+        onChange={(event) => {
+          setPrompt(event.target.value);
+          setError("");
+        }}
+        placeholder="Jaise: ek royal Indian palace mein sunset ke time realistic portrait"
+        rows={5}
+        disabled={loading}
+        className="w-full resize-none rounded-2xl border border-white/10 bg-[#1A1A24] px-4 py-4 text-white outline-none placeholder:text-gray-500 focus:border-yellow-400/40 disabled:opacity-50"
+      />
+    </div>
+
+    {error && (
+      <div className="mt-4 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+        {error}
+      </div>
+    )}
+
+    <button
+      type="button"
+      onClick={handleGenerate}
+      disabled={loading || !prompt.trim()}
+      className="mt-5 flex w-full items-center justify-center gap-2 rounded-2xl bg-[#D90429] px-6 py-4 font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+    >
+      <Wand2 size={20} />
+
+      {loading ? "Image Generate Ho Rahi Hai..." : "Generate Image"}
+    </button>
+
+  </div>
+
+  {image && (
+    <div className="mt-6 rounded-3xl border border-yellow-400/20 bg-[#0F0F16]/90 p-5 shadow-2xl">
+
+      <div className="mb-4 flex items-center justify-between">
+
+        <h2 className="text-xl font-semibold text-yellow-400">
+          ✨ Your Image
+        </h2>
+
         <button
-          onClick={handleGenerate}
-          disabled={loading}
-          className="mt-4 flex items-center gap-2 bg-[#D90429] px-6 py-2 rounded-xl font-semibold disabled:opacity-50 hover:opacity-90"
+          type="button"
+          onClick={clearImage}
+          className="rounded-full bg-white/10 p-2 text-gray-300 transition hover:bg-white/20"
         >
-          <Wand2 size={18} /> {loading? "Generating..." : "Generate/Edit"}
+          <X size={18} />
         </button>
+
       </div>
 
-      {/* Image Preview - Yahi choti hogi */}
-      {image && (
-        <div
-          className="rounded-2xl p-4"
-          style={{ background: "rgba(15,15,22,0.88)", border: "1px solid rgba(255,215,0,0.25)" }}
-        >
-          <div className="flex justify-center">
-            <img
-              src={image}
-              alt="result"
-              className="rounded-xl w-full max-w-md max-h-[60vh] object-contain"
-            />
-          </div>
-          <button className="mt-4 flex items-center gap-2 mx-auto px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-sm">
-            <Download size={16} /> Download
-          </button>
-        </div>
-      )}
+      <div className="flex justify-center overflow-hidden rounded-2xl bg-black/30 p-2">
+
+        <img
+          src={image}
+          alt="Generated by PriyaVRana-AI"
+          className="max-h-[70vh] w-full rounded-xl object-contain"
+        />
+
+      </div>
+
+      <button
+        type="button"
+        onClick={downloadImage}
+        className="mx-auto mt-5 flex items-center gap-2 rounded-xl bg-white/10 px-5 py-3 text-sm transition hover:bg-white/20"
+      >
+        <Download size={18} />
+        Download Image
+      </button>
+
     </div>
-  )
-}
+  )}
+
+</div>
