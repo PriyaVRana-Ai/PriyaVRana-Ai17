@@ -1,45 +1,69 @@
 export async function POST(req: Request) {
   try {
-    // 1. Key check sabse pehle
     const STABILITY_API_KEY = process.env.STABILITY_API_KEY;
+
     if (!STABILITY_API_KEY) {
-      return Response.json({ error: "Error: STABILITY_API_KEY nahi mili Vercel me" }, { status: 500 });
+      return Response.json(
+        { error: "STABILITY_API_KEY nahi mili. .env.local check karo." },
+        { status: 500 }
+      );
     }
 
-    const formData = await req.formData();
-    const image = formData.get("image") as File;
-    const prompt = formData.get("prompt") as string;
+    const { prompt } = await req.json();
 
-    if(!image || !prompt) {
-      return Response.json({ error: "Image aur Prompt dono chahiye" }, { status: 400 });
+    if (!prompt?.trim()) {
+      return Response.json(
+        { error: "Image prompt chahiye." },
+        { status: 400 }
+      );
     }
 
-    const stabilityForm = new FormData();
-    stabilityForm.append("image", image);
-    stabilityForm.append("prompt", prompt);
-    stabilityForm.append("output_format", "png"); // ya "jpeg"
+    const response = await fetch(
+      "https://api.stability.ai/v2beta/stable-image/generate/core",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${STABILITY_API_KEY}`,
+          Accept: "image/*",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          prompt: prompt.trim(),
+          output_format: "png",
+          aspect_ratio: "1:1",
+        }),
+      }
+    );
 
-    const res = await fetch("https://api.stability.ai/v2beta/stable-image/generate/core", {
-      method: "POST",
-      headers: { 
-        "Authorization": `Bearer ${STABILITY_API_KEY}`,
-        // Content-Type mat daalna, FormData khud laga dega
-      },
-      body: stabilityForm
+    if (!response.ok) {
+      const errorText = await response.text();
+
+      console.error("Stability API Error:", errorText);
+
+      return Response.json(
+        {
+          error: "Image generate nahi ho paayi. Stability API check karo.",
+        },
+        { status: response.status }
+      );
+    }
+
+    const imageBuffer = await response.arrayBuffer();
+
+    const base64Image = Buffer.from(imageBuffer).toString("base64");
+
+    return Response.json({
+      image: `data:image/png;base64,${base64Image}`,
+      reply: "✨ Image ready hai!",
     });
-
-    if(!res.ok) {
-      const err = await res.text();
-      return Response.json({ error: `Stability Error: ${err}` }, { status: res.status });
-    }
-
-    const blob = await res.blob();
-    return new Response(blob, { 
-      headers: { "Content-Type": "image/png" } 
-    });
-
-  } catch (error: any) {
+  } catch (error) {
     console.error("IMAGE API ERROR:", error);
-    return Response.json({ error: error.message }, { status: 500 });
+
+    return Response.json(
+      {
+        error: "Image generate karte waqt error aa gaya.",
+      },
+      { status: 500 }
+    );
   }
 }
