@@ -1,39 +1,70 @@
-"use client";
-import { useState } from "react";
-import Link from "next/link";
+  {/* Mobile Overlay */}
+  {open && (
+    <div
+      onClick={closeSidebar}
+      className="fixed inset-0 z-40 bg-black/70 md:hidden"
+    />
+  )}
 
-export default function Sidebar() {
-  const [open, setOpen] = useState(false);
+  {/* Sidebar */}
+  <aside
+    className={`fixed left-0 top-0 z-50 h-screen w-64 border-r border-yellow-400/20 bg-[#0A0A0F] p-5 text-white shadow-2xl transition-transform duration-300 ${
+      open ? "translate-x-0" : "-translate-x-full"
+    } md:translate-x-0`}
+  >
+    {/* Logo / Name */}
+    <div className="mb-8 border-b border-white/10 pb-5">
+      <h1 className="text-xl font-bold text-yellow-400">
+        👑 PriyaVRana-AI
+      </h1>
 
-  return (
-    <>
-      {/* Mobile Hamburger Button */}
-      <button 
-        onClick={() => setOpen(!open)} 
-        className="md:hidden fixed top-4 left-4 z-50 p-2 bg-royalblack text-white rounded-lg"
+      <p className="mt-1 text-xs text-gray-400">
+        Your AI Assistant
+      </p>
+    </div>
+
+    {/* Navigation */}
+    <nav className="flex flex-col gap-2">
+
+      <Link
+        href="/"
+        onClick={closeSidebar}
+        className="rounded-xl px-4 py-3 transition hover:bg-white/10 hover:text-yellow-400"
       >
-        ☰
-      </button>
+        🏠 Home
+      </Link>
 
-      {/* Sidebar */}
-      <aside className={`
-        fixed top-0 left-0 h-full w-64 bg-royalblack text-white p-4 z-40
-        transform transition-transform duration-300
-        ${open ? "translate-x-0" : "-translate-x-full"} 
-        md:translate-x-0
-      `}>
-        <h1 className="text-xl font-bold text-yellow-400 mb-6">PriyaVRana-AI</h1>
-        
-        <nav className="flex flex-col gap-3">
-          <Link href="/" onClick={() => setOpen(false)}>Home</Link>
-          <Link href="/chat" onClick={() => setOpen(false)}>AI Chat</Link>
-          <Link href="/image" onClick={() => setOpen(false)}>Image AI</Link>
-          <Link href="/shayari" onClick={() => setOpen(false)}>Shayari AI</Link>
-        </nav>
-      </aside>
+      <Link
+        href="/chat"
+        onClick={closeSidebar}
+        className="rounded-xl px-4 py-3 transition hover:bg-white/10 hover:text-yellow-400"
+      >
+        🤖 AI Chat
+      </Link>
 
-      {/* Overlay - mobile pe band karne ke liye */}
-      {open && <div onClick={() => setOpen(false)} className="md:hidden fixed inset-0 bg-black/50 z-30"></div>}
-    </>
-  );
-}
+      <Link
+        href="/image"
+        onClick={closeSidebar}
+        className="rounded-xl px-4 py-3 transition hover:bg-white/10 hover:text-yellow-400"
+      >
+        🖼️ Image AI
+      </Link>
+
+      <Link
+        href="/shayari"
+        onClick={closeSidebar}
+        className="rounded-xl px-4 py-3 transition hover:bg-white/10 hover:text-yellow-400"
+      >
+        ❤️ Shayari AI
+      </Link>
+
+    </nav>
+
+    {/* Bottom */}
+    <div className="absolute bottom-5 left-5 right-5 rounded-xl border border-yellow-400/10 bg-white/5 p-3">
+      <p className="text-center text-xs text-gray-400">
+        PriyaVRana-AI
+      </p>
+    </div>
+  </aside>
+</>
