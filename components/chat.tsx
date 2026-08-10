@@ -14,9 +14,8 @@ export default function Chat({ chat, setChat }: any) {
   const [loading, setLoading] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
-
-  headers: { "Authorization": `Bearer ${GROQ_KEY}` }
-headers: { "Authorization": `Bearer ${STABILITY_KEY}` }
+  const GROQ_KEY = process.env.NEXT_PUBLIC_GROQ_KEY; 
+const STABILITY_KEY = process.env.NEXT_PUBLIC_STABILITY_KEY;
 
   const send = async () => {
     if (!msg.trim() && !preview) return;
