@@ -41,7 +41,15 @@ export default function Home() {
               }}
             >
               <div className="mb-4 text-5xl">👑</div>
-
+<p
+  className="mb-4 text-2xl md:text-3xl font-bold"
+  style={{
+    color: "#FFD700",
+    textShadow: "0 0 15px rgba(217,4,41,0.7)"
+  }}
+>
+  🙏 जय श्री राम
+</p>
               <h1
                 className="text-4xl md:text-6xl font-bold"
                 style={{
