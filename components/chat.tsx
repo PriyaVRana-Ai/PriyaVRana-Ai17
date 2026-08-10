@@ -1,68 +1,112 @@
-"use client"
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef } from "react";
 
-export default function Chat({ chat, setChat }: any) {
-  const [input, setInput] = useState("")
-  const [preview, setPreview] = useState<string | null>(null)
-  const fileRef = useRef<HTMLInputElement>(null)
-  const bottomRef = useRef<HTMLDivElement>(null)
+const suggestions = [
+  { icon: "🖼️", text: "Create image" },
+  { icon: "📄", text: "Write anything" },
+  { icon: "✨", text: "Boost my day" },
+  { icon: "📚", text: "Help me learn" },
+];
 
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" })
-  }, [chat])
+export default function Chat({ chat, setChat, loading }: any) {
+  const [msg, setMsg] = useState("");
+  const [preview, setPreview] = useState<string | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  const send = () => {
+    if (!msg &&!preview) return;
+    setChat([...chat, { role: "user", content: msg, image: preview }]);
+    setMsg("");
+    setPreview(null);
+  };
 
   const handleFile = (e: any) => {
-    const file = e.target.files[0]
-    if (file) setPreview(URL.createObjectURL(file))
-  }
-
-  const sendMessage = () => {
-    if (!input.trim() &&!preview) return
-
-    let newMsg:any = { role: "user", content: input }
-    if (preview) newMsg.image = preview
-
-    setChat([...chat, newMsg])
-    setInput("")
-    setPreview(null)
-
-    // Demo AI Reply
-    setTimeout(() => {
-      setChat((prev:any) => [...prev, { role: "assistant", content: "Samajh gaya bhai 👑 Ab ispe kya karu?" }])
-    }, 800)
-  }
+    const file = e.target.files[0];
+    if (!file) return;
+    setPreview(URL.createObjectURL(file));
+  };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-120px)] md:h-[calc(100vh-100px)]">
-      <div className="flex-1 overflow-y-auto px-2 md:px-6 pb-24">
-        {chat.map((msg:any, i:number) => (
-          <div key={i} className={`flex gap-3 my-4 ${msg.role === "user"? "justify-end" : "justify-start"}`}>
-            {msg.role === "assistant" && <div className="text-2xl">🤖</div>}
-            <div className={`max-w-[80%] rounded-2xl px-4 py-3 ${msg.role === "user"? "bg-[#D90429] text-white" : "bg-white/10 text-gray-200"}`}>
-              {msg.image && <img src={msg.image} className="rounded-xl mb-2 max-w-xs"/>}
-              <p className="whitespace-pre-wrap">{msg.content}</p>
-            </div>
-            {msg.role === "user" && <div className="text-2xl">👤</div>}
+    <div className="flex flex-col h-full">
+      {/* 1. SUGGESTIONS - Sirf jab chat khali ho */}
+      {chat.length === 0 && (
+        <div className="flex-1 flex-col justify-center px-4">
+          <h1 className="text-2xl font-bold mb-6">Hi Vivu</h1>
+          <p className="text-3xl font-semibold mb-8">Where should we start?</p>
+          <div className="space-y-3">
+            {suggestions.map((s) => (
+              <button
+                key={s.text}
+                onClick={() => setMsg(s.text)}
+                className="w-full flex items-center gap-3 bg-white/10 hover:bg-white/20 px-4 py-3 rounded-full transition"
+              >
+                <span>{s.icon}</span>
+                <span>{s.text}</span>
+              </button>
+            ))}
           </div>
-        ))}
-        <div ref={bottomRef} />
-      </div>
-
-      {preview && (
-        <div className="fixed bottom-20 md:bottom-20 left-1/2 -translate-x-1/2 bg-black/80 p-2 rounded-xl">
-          <img src={preview} className="h-20 rounded-lg"/>
-          <button onClick={() => setPreview(null)} className="text-xs text-red-400 block mx-auto">Remove</button>
         </div>
       )}
 
-      <div className="fixed bottom-0 left-0 right-0 md:left-64 bg-[#0a0a0f]/90 backdrop-blur-md border-t border-white/10 p-3">
-        <div className="mx-auto max-w-3xl flex items-center gap-2">
-          <button onClick={() => fileRef.current?.click()} className="p-3 rounded-full bg-white/10 hover:bg-white/20 text-xl">+</button>
-          <input type="file" ref={fileRef} onChange={handleFile} accept="image/*" className="hidden"/>
-          <input value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && sendMessage()} placeholder="PriyaVRana-AI se pucho..." className="flex-1 bg-[#1a1a24] rounded-full px-4 py-3 text-white outline-none"/>
-          <button onClick={sendMessage} className="px-5 py-3 rounded-full bg-[#D90429] font-bold hover:opacity-90">Send</button>
+      {/* CHAT MESSAGES */}
+      {chat.length > 0 && (
+        <div className="flex-1 overflow-y-auto p-4 space-y-3">
+          {chat.map((m: any, i: number) => (
+            <div key={i} className={`flex ${m.role === "user"? "justify-end" : "justify-start"}`}>
+              <div className={`max-w-[80%] rounded-2xl px-4 py-3 ${m.role === "user"? "bg-[#D90429] text-white" : "bg-white/10 text-gray-200"}`}>
+                {m.image && (
+                  <img
+                    src={m.image}
+                    className="rounded-2xl mb-2 w-52 h-auto object-cover cursor-pointer"
+                    onClick={() => window.open(m.image, "_blank")}
+                  />
+                )}
+                <p className="whitespace-pre-wrap">{m.content}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* 2. INPUT AREA - Gemini wala */}
+      <div className="p-3 bg-black/40 backdrop-blur-xl border-t border-white/10">
+
+        {/* CHHOTI PHOTO PREVIEW */}
+        {preview && (
+          <div className="relative inline-block mb-2">
+            <img src={preview} className="h-12 w-12 rounded-lg object-cover"/>
+            <button
+              onClick={() => setPreview(null)}
+              className="absolute -top-2 -right-2 bg-black rounded-full w-5 h-5 flex items-center justify-center text-xs"
+            >×</button>
+          </div>
+        )}
+
+        <div className="flex items-center gap-2">
+          {/* + BUTTON */}
+          <button onClick={() => fileRef.current?.click()} className="p-2 hover:bg-white/10 rounded-full">
+            +
+          </button>
+          <input type="file" ref={fileRef} onChange={handleFile} className="hidden" accept="image/*"/>
+
+          {/* INPUT BOX */}
+          <input
+            value={msg}
+            onChange={(e) => setMsg(e.target.value)}
+            placeholder="Ask PriyaVRana AI"
+            className="flex-1 bg-white/10 rounded-full px-4 py-3 outline-none"
+            onKeyDown={(e) => e.key === "Enter" && send()}
+          />
+
+          {/* SEND BUTTON */}
+          <button
+            onClick={send}
+            disabled={loading}
+            className="p-3 bg-white/20 rounded-full hover:bg-white/30 disabled:opacity-50"
+          >
+            ➤
+          </button>
         </div>
       </div>
     </div>
-  )
+  );
 }
