@@ -1,28 +1,34 @@
 export async function POST(req: Request) {
   try {
-    const { messages } = await req.json()
+    const { message, messages } = await req.json();
 
-    const GROQ_API_KEY = process.env.GROQ_API_KEY
+    const GROQ_API_KEY = process.env.GROQ_API_KEY;
 
     if (!GROQ_API_KEY) {
       return Response.json(
-        { text: "PriyaVRana-AI: GROQ_API_KEY nahi mili." },
+        { error: "GROQ_API_KEY nahi mili. .env.local check karo." },
         { status: 500 }
-      )
+      );
     }
 
-    const lastMsg = messages[messages.length - 1]?.content || ""
+    const chatMessages = Array.isArray(messages)
+      ? messages
+          .filter(
+            (m: any) =>
+              (m.role === "user" || m.role === "assistant") &&
+              typeof m.content === "string"
+          )
+          .map((m: any) => ({
+            role: m.role,
+            content: m.content,
+          }))
+      : [];
 
-    const abuse = ["gaali", "abuse"]
-
-    if (
-      abuse.some((word) =>
-        lastMsg.toLowerCase().includes(word)
-      )
-    ) {
-      return Response.json({
-        text: "Rude baat mat karo 🙏 PriyaVRana-AI aapki madad ke liye hai."
-      })
+    if (chatMessages.length === 0 && message) {
+      chatMessages.push({
+        role: "user",
+        content: message,
+      });
     }
 
     const res = await fetch(
@@ -35,34 +41,49 @@ export async function POST(req: Request) {
         },
         body: JSON.stringify({
           model: "llama-3.3-70b-versatile",
-          messages,
+          messages: [
+            {
+              role: "system",
+              content:
+                "You are PriyaVRana-AI, a helpful and friendly AI assistant. Reply in Hindi or Hinglish according to the user's language. Give clear and useful answers.",
+            },
+            ...chatMessages,
+          ],
           temperature: 0.7,
         }),
       }
-    )
+    );
 
-    const data = await res.json()
+    const data = await res.json();
 
     if (!res.ok) {
-      console.error("Groq error:", data)
+      console.error("Groq error:", data);
 
       return Response.json(
-        { text: "PriyaVRana-AI ko AI response lene mein problem hui." },
+        {
+          error:
+            data?.error?.message ||
+            "Groq se response lene mein problem hui.",
+        },
         { status: 500 }
-      )
+      );
     }
 
+    const reply =
+      data.choices?.[0]?.message?.content ||
+      "Mujhe abhi jawab nahi mila.";
+
     return Response.json({
-      text:
-        data.choices?.[0]?.message?.content ||
-        "Mujhe abhi jawab nahi mila.",
-    })
+      reply,
+    });
   } catch (error) {
-    console.error("Chat error:", error)
+    console.error("Chat error:", error);
 
     return Response.json(
-      { text: "AI Chat mein temporary problem aa gayi." },
+      {
+        error: "AI Chat mein temporary problem aa gayi.",
+      },
       { status: 500 }
-    )
+    );
   }
 }
