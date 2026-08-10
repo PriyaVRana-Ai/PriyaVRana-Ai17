@@ -1,93 +1,68 @@
 "use client"
+import { useState, useRef, useEffect } from "react"
+import { Send, Plus, Mic } from "lucide-react"
 
-import { useState } from "react"
-import Sidebar from "../components/sidebar"
-import Chat from "../components/chat"
-import ImageAI from "../components/imageAi"
+export default function Chat({ chat, setChat }: any) {
+  const [input, setInput] = useState("")
+  const bottomRef = useRef<HTMLDivElement>(null)
 
-export default function Home() {
-  const [active, setActive] = useState("Home")
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" })
+  }, [chat])
 
-  const [chat, setChat] = useState([
-    {
-      role: "assistant",
-      content: "🙏 Radhe Radhe!\nPriyaVRana-AI में आपका हार्दिक स्वागत है।\nबताइए मैं आपकी कैसे मदद करूं?"
-    }
-  ])
+  const sendMessage = () => {
+    if (!input.trim()) return
+    setChat([...chat, { role: "user", content: input }])
+    setInput("")
+    // Yaha AI ka reply aayega
+    setTimeout(() => {
+      setChat((prev:any) => [...prev, { role: "assistant", content: "Ye demo reply hai 👑" }])
+    }, 500)
+  }
 
   return (
-    <div
-      className="min-h-screen text-white bg-black"
-      style={{
-        background: "radial-gradient(circle at top, #25000b 0%, #0a0a0f 45%, #050507 100%)"
-      }}
-    >
-      <Sidebar active={active} setActive={setActive} />
-
-      {/* Yahi line change ki hai - Mobile + Desktop dono thik */}
-      <main className="md:ml-64 pt-16 md:pt-6 min-h-screen p-6 md:p-10">
-
-        {/* HOME */}
-        {active === "Home" && (
-          <section className="mx-auto max-w-6xl">
-            <div
-              className="rounded-3xl p-8 md:p-12 text-center"
-              style={{
-                background: "rgba(15,15,22,0.88)",
-                border: "1px solid rgba(255,215,0,0.35)",
-                boxShadow: "0 0 35px rgba(217,4,41,0.25)"
-              }}
-            >
-              <div className="mb-4 text-5xl">👑</div>
-              <h1 className="text-4xl md:text-6xl font-bold text-yellow-400">PriyaVRana-AI</h1>
-              <p className="mt-5 text-xl text-gray-300">सोचो • पूछो • पाओ</p>
-              <p className="mx-auto mt-4 max-w-2xl text-gray-400">
-                आपका Premium AI Assistant — Chat, Shayari, Study, Comedy, Image और कई AI tools एक ही जगह।
-              </p>
+    <div className="flex flex-col h-[calc(100vh-120px)] md:h-[calc(100vh-100px)]">
+      
+      {/* Chat Messages - Scrollable Area */}
+      <div className="flex-1 overflow-y-auto px-2 md:px-6 pb-24">
+        {chat.map((msg:any, i:number) => (
+          <div key={i} className={`flex gap-3 my-4 ${msg.role === "user"? "justify-end" : "justify-start"}`}>
+            {msg.role === "assistant" && <div className="text-2xl">🤖</div>}
+            <div className={`max-w-[80%] rounded-2xl px-4 py-3 ${msg.role === "user"? "bg-[#D90429] text-white" : "bg-white/10 text-gray-200"}`}>
+              <p className="whitespace-pre-wrap">{msg.content}</p>
             </div>
+            {msg.role === "user" && <div className="text-2xl">👤</div>}
+          </div>
+        ))}
+        <div ref={bottomRef} />
+      </div>
 
-            <div className="mt-10 grid grid-cols-2 md:grid-cols-3 gap-4">
-              {["AI Chat", "Shayari AI", "Song AI", "Study AI", "Image AI", "Voice AI"].map((tool) => (
-                <button
-                  key={tool}
-                  onClick={() => setActive(tool)}
-                  className="rounded-2xl p-5 text-left hover:scale-[1.02] transition"
-                  style={{ background: "rgba(20,20,28,0.9)", border: "1px solid rgba(255,215,0,0.15)" }}
-                >
-                  <div className="text-2xl">🤖</div>
-                  <div className="mt-2 font-semibold text-yellow-400">{tool}</div>
-                  <div className="text-sm text-gray-400">Open Tool</div>
-                </button>
-              ))}
-            </div>
-          </section>
-        )}
+      {/* Bottom Input Bar - ChatGPT jaisa FIXED */}
+      <div className="fixed bottom-0 left-0 right-0 md:left-64 bg-[#0a0a0f]/90 backdrop-blur-md border-t border-white/10 p-3">
+        <div className="mx-auto max-w-3xl flex items-center gap-2">
+          
+          {/* + Button */}
+          <button className="p-2 rounded-full bg-white/10 hover:bg-white/20">
+            <Plus size={20} />
+          </button>
 
-        {/* AI CHAT */}
-        {active === "AI Chat" && (
-          <Chat chat={chat} setChat={setChat} />
-        )}
+          {/* Input Box */}
+          <input
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+            placeholder="PriyaVRana-AI se pucho..."
+            className="flex-1 bg-[#1a1a24] rounded-full px-4 py-3 text-white outline-none border-white/10"
+          />
 
-        {/* IMAGE AI */}
-        {active === "Image AI" && (
-          <ImageAI />
-        )}
-
-        {/* OTHER TOOLS */}
-        {!["Home", "AI Chat", "Image AI"].includes(active) && (
-          <section className="flex min-h-[70vh] items-center justify-center">
-            <div
-              className="w-full max-w-2xl rounded-3xl p-10 text-center"
-              style={{ background: "rgba(18,18,25,0.9)", border: "1px solid rgba(255,215,0,0.25)" }}
-            >
-              <div className="text-5xl">👑</div>
-              <h1 className="mt-5 text-3xl font-bold text-yellow-400">{active}</h1>
-              <p className="mt-4 text-gray-400">यह module अभी तैयार किया जा रहा है। जल्द आएगा।</p>
-            </div>
-          </section>
-        )}
-
-      </main>
+          {/* Mic or Send Button */}
+          <button 
+            onClick={sendMessage}
+            className="p-2 rounded-full bg-[#D90429] hover:opacity-90">
+            <Send size={18} />
+          </button>
+        </div>
+      </div>
     </div>
   )
 }
