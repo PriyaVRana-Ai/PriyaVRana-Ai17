@@ -26,7 +26,7 @@ export default function Home() {
     >
       <Sidebar active={active} setActive={setActive} />
 
-      <main className="ml-64 min-h-screen p-6 md:p-10">
+      <main className="md:ml-64 min-h-screen p-6 md:p-10 pt-20">
         
         {/* HOME */}
         {active === "Home" && (
