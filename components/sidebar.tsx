@@ -1,64 +1,39 @@
-"use client"
-import { useState } from "react"
-import { Menu, X } from "lucide-react"
+"use client";
+import { useState } from "react";
+import Link from "next/link";
 
-const menu = [
-  { name: "Home", icon: "🏠" },
-  { name: "AI Chat", icon: "🤖" },
-  { name: "Shayari AI", icon: "❤️" },
-  { name: "Song AI", icon: "🎵" },
-  { name: "Study AI", icon: "📚" },
-  { name: "Comedy AI", icon: "😂" },
-  { name: "Image AI", icon: "🎨" },
-  { name: "Voice AI", icon: "🎤" },
-  { name: "Script Writer", icon: "✍️" },
-]
-
-export default function Sidebar({ active, setActive }: any) {
-  const [open, setOpen] = useState(false)
+export default function Sidebar() {
+  const [open, setOpen] = useState(false);
 
   return (
     <>
-      {/* Mobile Top Bar */}
-      <div className="md:hidden fixed top-0 left-0 w-full bg-[#171717] p-3 flex justify-between items-center z-50 border-b border-white/10">
-        <div className="text-xl font-bold text-yellow-400">👑 PriyaVRana-AI</div>
-        <button onClick={() => setOpen(!open)}><Menu size={24}/></button>
-      </div>
+      {/* Mobile Hamburger Button */}
+      <button 
+        onClick={() => setOpen(!open)} 
+        className="md:hidden fixed top-4 left-4 z-50 p-2 bg-royalblack text-white rounded-lg"
+      >
+        ☰
+      </button>
 
       {/* Sidebar */}
-      <aside className={`fixed left-0 top-0 h-screen w-64 bg-[#171717] border-r border-white/10 p-3 flex-col z-40
-        ${open? "flex" : "hidden"} md:flex`}>
-
-        {/* Logo */}
-        <div className="flex justify-between items-center mb-6 px-2 pt-2">
-          <div className="text-2xl font-bold text-yellow-400">👑 PriyaVRana-AI</div>
-          <button onClick={() => setOpen(false)} className="md:hidden"><X size={20}/></button>
-        </div>
-
-        {/* Menu */}
-        <div className="flex-1 space-y-1 overflow-y-auto">
-          {menu.map((item) => (
-            <button
-              key={item.name}
-              onClick={() => {setActive(item.name); setOpen(false)}}
-              className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left text-sm transition
-                ${active === item.name
-                ? "bg-white/10 text-white"
-                  : "text-gray-400 hover:bg-white/5 hover:text-white"}`}
-            >
-              <span className="text-lg">{item.icon}</span>
-              {item.name}
-            </button>
-          ))}
-        </div>
-
-        {/* Bottom */}
-        <div className="border-t border-white/10 pt-3">
-          <button className="w-full text-left text-gray-400 hover:text-white px-3 py-2 text-sm">
-            Settings
-          </button>
-        </div>
+      <aside className={`
+        fixed top-0 left-0 h-full w-64 bg-royalblack text-white p-4 z-40
+        transform transition-transform duration-300
+        ${open ? "translate-x-0" : "-translate-x-full"} 
+        md:translate-x-0
+      `}>
+        <h1 className="text-xl font-bold text-yellow-400 mb-6">PriyaVRana-AI</h1>
+        
+        <nav className="flex flex-col gap-3">
+          <Link href="/" onClick={() => setOpen(false)}>Home</Link>
+          <Link href="/chat" onClick={() => setOpen(false)}>AI Chat</Link>
+          <Link href="/image" onClick={() => setOpen(false)}>Image AI</Link>
+          <Link href="/shayari" onClick={() => setOpen(false)}>Shayari AI</Link>
+        </nav>
       </aside>
+
+      {/* Overlay - mobile pe band karne ke liye */}
+      {open && <div onClick={() => setOpen(false)} className="md:hidden fixed inset-0 bg-black/50 z-30"></div>}
     </>
-  )
+  );
 }
