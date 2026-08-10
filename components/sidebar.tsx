@@ -1,52 +1,49 @@
 "use client"
 
-const items = [
-  "Home",
-  "AI Chat",
-  "Shayari AI",
-  "Song AI",
-  "Study AI",
-  "Comedy AI",
-  "Image AI",
-  "Voice AI",
-  "Script Writer",
-  "Video Ideas",
-  "Caption",
-  "Reply",
-  "Translator",
-  "Settings",
-  "Admin Panel"
+const menu = [
+  { name: "Home", icon: "🏠" },
+  { name: "AI Chat", icon: "🤖" },
+  { name: "Shayari AI", icon: "❤️" },
+  { name: "Song AI", icon: "🎵" },
+  { name: "Study AI", icon: "📚" },
+  { name: "Comedy AI", icon: "😂" },
+  { name: "Image AI", icon: "🎨" },
+  { name: "Voice AI", icon: "🎤" },
+  { name: "Script Writer", icon: "✍️" },
 ]
 
-export default function Sidebar({
-  active,
-  setActive
-}: {
-  active: string
-  setActive: (s: string) => void
-}) {
+export default function Sidebar({ active, setActive }: any) {
   return (
-    <aside className="fixed left-0 top-0 z-50 h-screen w-64 overflow-y-auto border-r border-yellow-500/20 bg-black/90 p-4">
-
-      <div className="mb-6">
-        <p className="text-sm font-semibold text-yellow-400">
-          👑 AI MENU
-        </p>
+    <aside className="fixed left-0 top-0 h-screen w-64 bg-[#171717] border-r border-white/10 p-3 flex flex-col">
+      {/* Logo */}
+      <div className="text-2xl font-bold text-yellow-400 mb-6 px-2">
+        👑 PriyaVRana-AI
       </div>
 
-      {items.map((item) => (
-        <button
-          key={item}
-          onClick={() => setActive(item)}
-          className={`mb-1 w-full rounded-xl px-4 py-3 text-left font-medium transition ${
-            active === item
-              ? "bg-red-700 text-white shadow-[0_0_20px_rgba(217,4,41,0.5)]"
-              : "text-gray-300 hover:bg-red-950 hover:text-white"
-          }`}
-        >
-          {item}
+      {/* Menu */}
+      <div className="flex-1 space-y-1 overflow-y-auto">
+        {menu.map((item) => (
+          <button
+            key={item.name}
+            onClick={() => setActive(item.name)}
+            className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left text-sm transition
+              ${active === item.name
+               ? "bg-white/10 text-white"
+                : "text-gray-400 hover:bg-white/5 hover:text-white"
+              }`}
+          >
+            <span className="text-lg">{item.icon}</span>
+            {item.name}
+          </button>
+        ))}
+      </div>
+
+      {/* Bottom */}
+      <div className="border-t border-white/10 pt-3">
+        <button className="w-full text-left text-gray-400 hover:text-white px-3 py-2 text-sm">
+          Settings
         </button>
-      ))}
+      </div>
     </aside>
   )
 }
